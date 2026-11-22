@@ -20,10 +20,16 @@ un enjambre de cursores de colores **construye la página** delante de ti (efect
 Se repite **en cada carga**. Con `prefers-reduced-motion` no hace nada, en pantallas de menos de 600 px usa
 8 cursores en lugar de 14, solo anima `transform` y `opacity`, y sin JavaScript la página se ve completa.
 
+## Distribución
+
+Dos columnas en escritorio: a la izquierda, fija, la foto, el nombre, un índice que marca la sección activa y los
+botones de contacto; a la derecha, lo que hace scroll (Sobre mí, Experiencia, Proyectos, Formación, Habilidades,
+Contacto). En pantallas bajas la columna fija se compacta. Por debajo de 960 px es una sola columna sin índice.
+
 ## Efectos de acompañamiento (`styles.css` + `site.js`)
 
-Tema oscuro, aurora que respira detrás del hero (E8), luz que sigue al cursor en las tarjetas (D4), línea de tiempo
-que se dibuja al bajar por Experiencia (C14), barra de progreso de lectura (C2) y cabecera que se oculta al bajar (G5).
+Tema oscuro, aurora de fondo (E8), luz que sigue al cursor en las tarjetas (D4), línea de tiempo que se dibuja al
+bajar por Experiencia (C14) y barra de progreso de lectura (C2).
 Todos se apagan con `prefers-reduced-motion`.
 
 ## Editar el contenido

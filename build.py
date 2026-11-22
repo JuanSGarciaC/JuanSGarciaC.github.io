@@ -32,7 +32,8 @@ C = {
     "es": dict(
         title="Juan Sebastián García Carrillo · Analista de sistemas y datos, QA y automatización con IA",
         description="CV y portafolio de Juan Sebastián García Carrillo: QA, análisis de datos y automatización con IA. Ocho proyectos con código y demos.",
-        nav=[("proyectos", "Proyectos"), ("experiencia", "Experiencia"), ("formacion", "Formación"), ("contacto", "Contacto")],
+        nav=[("sobre-mi", "Sobre mí"), ("experiencia", "Experiencia"), ("proyectos", "Proyectos"), ("formacion", "Formación"), ("habilidades", "Habilidades"), ("contacto", "Contacto")],
+        about_h="Sobre mí", nav_label="Secciones",
         other_lang=("EN", "en/"),
         kicker="Bogotá, Colombia · Ingeniero de Sistemas",
         role="Analista de sistemas y datos · QA · Automatización con IA",
@@ -40,7 +41,7 @@ C = {
                  "documenté historias de usuario e integraciones, con criterios de aceptación en equipos Agile/Scrum. En mi práctica "
                  "profesional hice análisis estadístico y de tendencias para apoyar decisiones, automaticé hojas de Excel con macros y "
                  "desarrollé el prototipo de un agente de IA conversacional."),
-        b_projects="Ver proyectos", b_mail="Correo", where="Disponible para trabajo remoto, híbrido o presencial en Bogotá.",
+        b_mail="Correo", where="Disponible para trabajo remoto, híbrido o presencial en Bogotá.",
         projects_h="Proyectos", projects_lead=("Ocho proyectos con una idea común: sistemas que fallan de forma segura, se pueden revisar "
                                                "y miden lo que prometen. Cada uno tiene su código, pruebas automáticas y una sección de límites."),
         learned="Aprendí:", link_names={"code": "Código", "demo": "Demo en vivo", "page": "Página del proyecto"},
@@ -113,7 +114,8 @@ C = {
     "en": dict(
         title="Juan Sebastián García Carrillo · Systems & Data Analyst, QA and AI-powered automation",
         description="CV and portfolio of Juan Sebastián García Carrillo: QA, data analysis and AI-powered automation. Eight projects with code and demos.",
-        nav=[("proyectos", "Projects"), ("experiencia", "Experience"), ("formacion", "Education"), ("contacto", "Contact")],
+        nav=[("sobre-mi", "About"), ("experiencia", "Experience"), ("proyectos", "Projects"), ("formacion", "Education"), ("habilidades", "Skills"), ("contacto", "Contact")],
+        about_h="About", nav_label="Sections",
         other_lang=("ES", "../"),
         kicker="Bogotá, Colombia · Systems Engineer",
         role="Systems & Data Analyst · QA · AI-powered automation",
@@ -121,7 +123,7 @@ C = {
                  "analyzed and documented user stories and integrations, with acceptance criteria, in Agile/Scrum teams. In my professional "
                  "internship I performed statistical and trend analysis to support decisions, automated Excel workbooks with macros and "
                  "built the prototype of a conversational AI agent."),
-        b_projects="See projects", b_mail="Email", where="Open to remote, hybrid or on-site work in Bogotá.",
+        b_mail="Email", where="Open to remote, hybrid or on-site work in Bogotá.",
         projects_h="Projects", projects_lead=("Eight projects with one idea in common: systems that fail safely, can be audited and measure "
                                               "what they promise. Each one has its code, automated tests and a section on its limits."),
         learned="I learned:", link_names={"code": "Code", "demo": "Live demo", "page": "Project page"},
@@ -199,7 +201,8 @@ E = escape
 def page(lang):
     c = C[lang]
     pre = "" if lang == "es" else "../"
-    nav = "".join(f'<a href="#{i}">{E(t)}</a>' for i, t in c["nav"])
+    nav = "".join(f'<li><a href="#{i}"><span class="n">0{k}</span><span class="bar"></span>{E(t)}</a></li>'
+                  for k, (i, t) in enumerate(c["nav"], 1))
     cards = []
     for pr in PROJECTS:
         name, tag, desc, learned = c["p"][pr["k"]]
@@ -235,82 +238,86 @@ def page(lang):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(c["title"])}</title>
 <meta name="description" content="{E(c["description"])}">
+<meta name="theme-color" content="#0b1120">
 <meta property="og:title" content="{E(c["title"])}">
 <meta property="og:description" content="{E(c["description"])}">
-<meta property="og:image" content="https://juansgarciac.github.io/img/storylens.webp">
+<meta property="og:image" content="https://juansgarciac.github.io/img/{foto.name if foto else 'storylens.webp'}">
 {alt}
 <link rel="icon" href="{pre}favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="{pre}styles.css">
 </head>
 <body>
 <script src="{pre}swarm-rebuild.js" data-agents="14"></script>
-<div data-sr-root>
-<header class="top"><div class="wrap">
-  <a class="brand" href="#inicio">Juan Sebastián <span>García</span></a>
-  <nav aria-label="Secciones">{nav}</nav>
-  <a class="lang" href="{other_href}" hreflang="{other_label.lower()}">{other_label}</a>
-</div></header>
+<div class="aurora" aria-hidden="true"></div>
+<div data-sr-root class="layout">
 
-<main id="inicio">
-<section class="hero"><div class="wrap{' has-photo' if photo else ''}">
-  {photo}
-  <div class="intro">
-  <p class="kicker">{E(c["kicker"])}</p>
-  <h1>Juan Sebastián García Carrillo</h1>
-  <p class="role">{E(c["role"])}</p>
-  <p class="summary">{E(c["summary"])}</p>
-  <ul class="actions">
-    <li><a class="btn" href="#proyectos">{E(c["b_projects"])}</a></li>
-    <li>{mail}</li>
-    <li><a class="btn" href="https://www.linkedin.com/in/juansgc" rel="noopener">LinkedIn</a></li>
-    <li><a class="btn" href="{GH}" rel="noopener">GitHub</a></li>
-  </ul>
-  <p class="where">{E(c["where"])}</p>
+<header class="side">
+  <div class="side-in">
+    {photo}
+    <p class="kicker">{E(c["kicker"])}</p>
+    <h1><a href="#sobre-mi">Juan Sebastián García Carrillo</a></h1>
+    <p class="role">{E(c["role"])}</p>
+    <p class="where">{E(c["where"])}</p>
+    <nav class="toc" aria-label="{E(c["nav_label"])}"><ul>{nav}</ul></nav>
+    <ul class="actions">
+      <li>{mail}</li>
+      <li><a class="btn" href="https://www.linkedin.com/in/juansgc" rel="noopener">LinkedIn</a></li>
+      <li><a class="btn" href="{GH}" rel="noopener">GitHub</a></li>
+      <li><a class="btn lang" href="{other_href}" hreflang="{other_label.lower()}">{other_label}</a></li>
+    </ul>
   </div>
-</div></section>
+</header>
 
-<section id="proyectos"><div class="wrap">
+<main class="content">
+<section id="sobre-mi">
+  <h2>{E(c["about_h"])}</h2>
+  <p class="summary">{E(c["summary"])}</p>
+</section>
+
+<section id="experiencia">
+  <h2>{E(c["exp_h"])}</h2>
+  <div class="timeline">{jobs}</div>
+</section>
+
+<section id="proyectos">
   <h2>{E(c["projects_h"])}</h2>
   <p class="lead">{E(c["projects_lead"])}</p>
   <div class="grid">{"".join(cards)}</div>
   <p class="note">{E(c["note"])}</p>
-</div></section>
+</section>
 
-<section id="experiencia"><div class="wrap">
-  <h2>{E(c["exp_h"])}</h2>
-  <div class="timeline">{jobs}</div>
-</div></section>
-
-<section id="formacion"><div class="wrap">
+<section id="formacion">
+  <h2>{E(c["edu_h"])}</h2>
+  <div class="panel"><ul class="edu">{edu}</ul></div>
   <div class="two">
-    <div class="panel"><h2>{E(c["edu_h"])}</h2><ul class="edu">{edu}</ul></div>
-    <div class="panel"><h2>{E(c["cert_h"])}</h2><ul>{certs}</ul><h2>{E(c["lang_h"])}</h2><p>{E(c["langs"])}</p></div>
+    <div class="panel"><h3>{E(c["cert_h"])}</h3><ul class="plain">{certs}</ul></div>
+    <div class="panel"><h3>{E(c["lang_h"])}</h3><p>{E(c["langs"])}</p></div>
   </div>
-</div></section>
+</section>
 
-<section id="habilidades"><div class="wrap">
+<section id="habilidades">
   <h2>{E(c["skills_h"])}</h2>
   <div class="skills">{skills}</div>
-</div></section>
+</section>
 
-<section id="contacto" class="contact"><div class="wrap">
+<section id="contacto" class="contact">
   <div class="panel">
     <h2>{E(c["contact_h"])}</h2>
-    <p class="lead" style="margin-inline:auto">{E(c["contact_lead"])}</p>
-    <ul class="actions" style="justify-content:center">
+    <p class="lead">{E(c["contact_lead"])}</p>
+    <ul class="actions">
       <li>{mail}</li>
       <li><a class="btn" href="https://www.linkedin.com/in/juansgc" rel="noopener">LinkedIn</a></li>
       <li><a class="btn" href="{GH}" rel="noopener">GitHub</a></li>
     </ul>
     <noscript><p>{E(c["mail_fallback"])}</p></noscript>
   </div>
-</div></section>
-</main>
+</section>
 
-<footer><div class="wrap">
+<footer>
   <p>{E(c["footer"])} <button type="button" data-sr-replay>{E(c["replay"])}</button></p>
   <p>© 2026 Juan Sebastián García Carrillo</p>
-</div></footer>
+</footer>
+</main>
 </div>
 <script src="{pre}site.js" defer></script>
 </body>
