@@ -10,7 +10,7 @@ un enjambre de cursores de colores **construye la página** delante de ti (efect
 1. **Escaneo (~1,2 s):** antes del primer pintado se ocultan los bloques (títulos, párrafos, listas, botones, imágenes)
    y se vacían el fondo y el borde de las tarjetas. Los cursores giran en el centro y una línea azul recorre la pantalla.
 2. **Construcción al ritmo del scroll:** cada cursor toma el siguiente bloque *visible*, vuela hasta él, dibuja un marco
-   de su color y lo revela; los textos se teclean sin mover el diseño. Velocidad fija (3×, mínimo 180 ms por bloque).
+   de su color y lo revela; los textos se teclean sin mover el diseño. Velocidad fija (2×, mínimo 220 ms por bloque); los cursores no llevan nombre.
 3. **Scroll libre:** el scroll nunca se bloquea ni se frena. Lo que entra en pantalla se construye; lo que dejas atrás
    sin construir aparece al instante (no falta nada al volver); lo de abajo espera a que llegues. Al final de la
    página se construye todo lo que queda.

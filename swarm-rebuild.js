@@ -28,8 +28,7 @@
   var BOX_SEL = ".card,.panel,[data-sr-box]";
   var COLORS = ["#2563eb", "#db2777", "#16a34a", "#ea580c", "#7c3aed", "#0891b2", "#ca8a04",
                 "#dc2626", "#0d9488", "#9333ea", "#4f46e5", "#65a30d", "#c026d3", "#0284c7"];
-  var NAMES = ["Ana", "Leo", "Mía", "Sam", "Iris", "Teo", "Noa", "Max", "Lía", "Gael", "Eva", "Juan", "Sol", "Pau"];
-  var SPEED = 3, MIN_REVEAL_MS = 180, SCROLL_SPEED = 2200, MAX_CURSOR = 1800, SCAN_MS = 1200;
+  var SPEED = 2, MIN_REVEAL_MS = 220, SCROLL_SPEED = 2200, MAX_CURSOR = 1800, SCAN_MS = 1200;
 
   // Corre en cada carga de la página.
   hideNow();
@@ -93,9 +92,7 @@
       a.style.cssText = "position:absolute;left:0;top:0;will-change:transform;transform-origin:0 0";
       a.innerHTML =
         '<svg width="20" height="22" viewBox="0 0 20 22" style="display:block;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.35))">' +
-        '<path d="M1 1 L1 17 L5.5 13 L8.5 20 L11.5 18.6 L8.6 11.8 L14.5 11.8 Z" fill="' + c + '" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg>' +
-        '<span style="position:absolute;left:15px;top:17px;font:600 11px/1 system-ui,sans-serif;color:#fff;background:' + c +
-        ';padding:3px 6px;border-radius:6px;white-space:nowrap">' + NAMES[i % NAMES.length] + "</span>";
+        '<path d="M1 1 L1 17 L5.5 13 L8.5 20 L11.5 18.6 L8.6 11.8 L14.5 11.8 Z" fill="' + c + '" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg>';
       ui.appendChild(a);
       var ang = (i / n) * Math.PI * 2;
       var svg = a.firstChild;
