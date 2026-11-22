@@ -29,7 +29,7 @@
   var COLORS = ["#2563eb", "#db2777", "#16a34a", "#ea580c", "#7c3aed", "#0891b2", "#ca8a04",
                 "#dc2626", "#0d9488", "#9333ea", "#4f46e5", "#65a30d", "#c026d3", "#0284c7"];
   var NAMES = ["Ana", "Leo", "Mía", "Sam", "Iris", "Teo", "Noa", "Max", "Lía", "Gael", "Eva", "Juan", "Sol", "Pau"];
-  var SCROLL_SPEED = 900, MAX_CURSOR = 1800, SCAN_MS = 1800;
+  var SCROLL_SPEED = 2200, MAX_CURSOR = 1800, SCAN_MS = 1800;
 
   // Corre en cada carga de la página.
   hideNow();
@@ -67,7 +67,7 @@
       scope: scope, layers: layers.map(function (el, i) { return { el: el, i: i, state: "todo" }; }),
       boxes: Array.prototype.slice.call(scope.querySelectorAll(BOX_SEL)),
       agents: [], ui: null, bar: null, t0: performance.now(), last: performance.now(),
-      phase: "scan", speed: 1, desire: window.scrollY, tour: false, built: 0, finishedAt: 0,
+      phase: "scan", speed: 4, desire: window.scrollY, tour: false, built: 0, finishedAt: 0,
       mouse: { x: window.innerWidth / 2, y: window.innerHeight / 2, moved: 0 }, exiting: false, raf: 0
     };
     buildUi(n);
@@ -114,13 +114,13 @@
       '<span class="sr-dot"></span><span data-k="agents"></span><span data-k="layers"></span>' +
       '<span class="sr-progress"><i></i></span>' +
       '<button type="button" data-k="tour">' + T.tour + '</button>' +
-      '<button type="button" data-k="speed">1×</button>' +
+      '<button type="button" data-k="speed">4×</button>' +
       '<button type="button" data-k="skip" title="' + T.skip + '">⏭</button>' +
       '<button type="button" data-k="close" aria-label="' + T.close + '" title="' + T.close + '">✕</button>';
     document.body.appendChild(bar);
     S.bar = bar;
     bar.querySelector('[data-k="tour"]').onclick = function () { S.tour = !S.tour; this.classList.toggle("on", S.tour); };
-    bar.querySelector('[data-k="speed"]').onclick = function () { S.speed = S.speed === 1 ? 4 : 1; this.textContent = S.speed + "×"; };
+    bar.querySelector('[data-k="speed"]').onclick = function () { S.speed = S.speed === 4 ? 8 : 4; this.textContent = S.speed + "×"; };
     bar.querySelector('[data-k="skip"]').onclick = skipAll;
     bar.querySelector('[data-k="close"]').onclick = exit;
     updateBar();
@@ -143,19 +143,16 @@
   function bindInput() {
     // Fuera de la construcción, el scroll es del usuario: cualquier gesto suyo apaga el Tour.
     function userTakesOver() { if (S.tour) { S.tour = false; var b = S.bar && S.bar.querySelector('[data-k="tour"]'); if (b) b.classList.remove("on"); } }
-    S.onWheel = function (e) { if (!building()) { userTakesOver(); return; } e.preventDefault(); S.desire += e.deltaY; };
-    var ty = null;
-    S.onTouchStart = function (e) { ty = e.touches[0].clientY; if (!building()) userTakesOver(); };
-    S.onTouchMove = function (e) {
-      if (!building() || ty === null) return;
-      e.preventDefault();
-      var y = e.touches[0].clientY; S.desire += (ty - y) * 1.5; ty = y;
-    };
+    // El scroll es siempre del usuario: si lo usa mientras se construye, la construcción termina al instante
+    // y el gesto pasa tal cual al navegador (nunca se bloquea).
+    function userScrolls() { if (building()) skipAll(); userTakesOver(); }
+    S.onWheel = function () { userScrolls(); };
+    S.onTouchStart = function () { if (!building()) userTakesOver(); };
+    S.onTouchMove = function () { userScrolls(); };
+    var SCROLL_KEYS = { ArrowDown: 1, ArrowUp: 1, PageDown: 1, PageUp: 1, " ": 1, End: 1, Home: 1 };
     S.onKey = function (e) {
       if (e.key === "Escape") { if (building()) skipAll(); return; }
-      if (!building()) { userTakesOver(); return; }
-      var vh = window.innerHeight, d = { ArrowDown: 60, ArrowUp: -60, PageDown: vh * .8, PageUp: -vh * .8, " ": vh * .8, End: 1e6, Home: -1e6 }[e.key];
-      if (d !== undefined) { e.preventDefault(); S.desire += d; }
+      if (SCROLL_KEYS[e.key]) userScrolls();
     };
     S.onMouse = function (e) { S.mouse.x = e.clientX; S.mouse.y = e.clientY; S.mouse.moved = performance.now(); };
     // Un enlace interno durante la construcción termina la construcción y deja saltar.
@@ -163,9 +160,9 @@
       var a = e.target.closest && e.target.closest('a[href^="#"]');
       if (a && building()) skipAll();
     };
-    window.addEventListener("wheel", S.onWheel, { passive: false });
+    window.addEventListener("wheel", S.onWheel, { passive: true });
     window.addEventListener("touchstart", S.onTouchStart, { passive: true });
-    window.addEventListener("touchmove", S.onTouchMove, { passive: false });
+    window.addEventListener("touchmove", S.onTouchMove, { passive: true });
     window.addEventListener("keydown", S.onKey);
     window.addEventListener("mousemove", S.onMouse, { passive: true });
     document.addEventListener("click", S.onClick, true);
