@@ -107,7 +107,7 @@ C = {
         lang_h="Idiomas", langs="Español (nativo) · Inglés B2 (lectura técnica y documentación)",
         contact_h="Hablemos", contact_lead="¿Buscas a alguien para QA, análisis de datos o automatización con IA? Escríbeme.",
         mail_fallback="juansgarciac2003 [arroba] gmail.com",
-        footer="Hecho con HTML, CSS y JavaScript, sin dependencias. Los cursores de colores construyen la página la primera vez que entras.",
+        footer="Hecho con HTML, CSS y JavaScript, sin dependencias. Los cursores de colores construyen la página cada vez que entras.",
         replay="Ver otra vez la construcción",
     ),
     "en": dict(
@@ -188,7 +188,7 @@ C = {
         lang_h="Languages", langs="Spanish (native) · English B2 (technical reading and documentation)",
         contact_h="Let's talk", contact_lead="Looking for someone for QA, data analysis or AI-powered automation? Write to me.",
         mail_fallback="juansgarciac2003 [at] gmail.com",
-        footer="Built with HTML, CSS and JavaScript, no dependencies. The colored cursors build the page the first time you visit.",
+        footer="Built with HTML, CSS and JavaScript, no dependencies. The colored cursors build the page every time you visit.",
         replay="Watch the build again",
     ),
 }
@@ -222,6 +222,10 @@ def page(lang):
     other_label, other_href = c["other_lang"]
     alt = (f'<link rel="alternate" hreflang="en" href="https://juansgarciac.github.io/en/">'
            f'<link rel="alternate" hreflang="es" href="https://juansgarciac.github.io/">')
+    # La foto sale de img/foto.(webp|jpg|png) si existe; sin archivo el hero queda solo con texto.
+    foto = next((f for f in (HERE / "img").glob("foto.*") if f.suffix.lower() in (".webp", ".jpg", ".jpeg", ".png")), None)
+    photo = (f'<img class="avatar" src="{pre}img/{foto.name}" alt="Juan Sebastián García Carrillo" width="220" height="220">'
+             if foto else "")
     mail = (f'<a class="btn primary" data-mail data-u="juansgarciac2003" data-d="gmail.com" href="#contacto">'
             f'{E(c["b_mail"])}</a>')
     return f"""<!doctype html>
@@ -248,7 +252,9 @@ def page(lang):
 </div></header>
 
 <main id="inicio">
-<section class="hero"><div class="wrap">
+<section class="hero"><div class="wrap{' has-photo' if photo else ''}">
+  {photo}
+  <div class="intro">
   <p class="kicker">{E(c["kicker"])}</p>
   <h1>Juan Sebastián García Carrillo</h1>
   <p class="role">{E(c["role"])}</p>
@@ -260,6 +266,7 @@ def page(lang):
     <li><a class="btn" href="{GH}" rel="noopener">GitHub</a></li>
   </ul>
   <p class="where">{E(c["where"])}</p>
+  </div>
 </div></section>
 
 <section id="proyectos"><div class="wrap">

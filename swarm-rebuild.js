@@ -29,12 +29,10 @@
   var COLORS = ["#2563eb", "#db2777", "#16a34a", "#ea580c", "#7c3aed", "#0891b2", "#ca8a04",
                 "#dc2626", "#0d9488", "#9333ea", "#4f46e5", "#65a30d", "#c026d3", "#0284c7"];
   var NAMES = ["Ana", "Leo", "Mía", "Sam", "Iris", "Teo", "Noa", "Max", "Lía", "Gael", "Eva", "Juan", "Sol", "Pau"];
-  var SCROLL_SPEED = 900, MAX_CURSOR = 1800, SCAN_MS = 1800, STORAGE = "sr-built";
+  var SCROLL_SPEED = 900, MAX_CURSOR = 1800, SCAN_MS = 1800;
 
-  var replayRequested = false;
-  try { replayRequested = sessionStorage.getItem(STORAGE) === "1"; } catch (e) { /* sin storage: siempre corre */ }
-  // La gracia es la primera vez: en la misma sesión no se repite salvo con data-sr-replay.
-  if (!replayRequested) hideNow();
+  // Corre en cada carga de la página.
+  hideNow();
 
   function hideNow() {
     root.classList.add("sr-active");
@@ -388,7 +386,6 @@
     S.finishedAt = now || performance.now();
     root.classList.remove("sr-active");
     S.boxes.forEach(function (b) { b.classList.add("sr-box-done"); });
-    try { sessionStorage.setItem(STORAGE, "1"); } catch (e) { /* nada */ }
     updateBar();
   }
 
@@ -445,10 +442,8 @@
     if (b) { e.preventDefault(); replay(); }
   });
 
-  if (!replayRequested) {
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
-    else start();
-  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
   // Para pruebas: estado público mínimo.
   window.SwarmRebuild = { replay: replay, skip: function () { skipAll(); },
     state: function () { return S ? { phase: S.phase, built: S.built, total: S.layers.length } : null; } };
