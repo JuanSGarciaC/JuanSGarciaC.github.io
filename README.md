@@ -7,15 +7,15 @@ un enjambre de cursores de colores **construye la página** delante de ti (efect
 
 ## El efecto (`swarm-rebuild.js`)
 
-1. **Escaneo (~1,8 s):** antes del primer pintado se ocultan los bloques (títulos, párrafos, listas, botones, imágenes)
+1. **Escaneo (~1,2 s):** antes del primer pintado se ocultan los bloques (títulos, párrafos, listas, botones, imágenes)
    y se vacían el fondo y el borde de las tarjetas. Los cursores giran en el centro y una línea azul recorre la pantalla.
-2. **Construcción:** cada cursor toma el siguiente bloque visible en orden, vuela hasta él, dibuja un marco de su color
-   con la etiqueta del bloque y lo revela. Los textos se teclean sin mover el diseño.
-3. **Scroll libre:** el scroll nunca se bloquea. Si haces scroll (rueda, teclas o dedo) mientras construye, la
-   construcción termina al instante y la página se ve completa. Sin tocar nada, construye lo visible a 4× y espera.
+2. **Construcción al ritmo del scroll:** cada cursor toma el siguiente bloque *visible*, vuela hasta él, dibuja un marco
+   de su color y lo revela; los textos se teclean sin mover el diseño. Velocidad fija (3×, mínimo 180 ms por bloque).
+3. **Scroll libre:** el scroll nunca se bloquea ni se frena. Lo que entra en pantalla se construye; lo que dejas atrás
+   sin construir aparece al instante (no falta nada al volver); lo de abajo espera a que llegues. Al final de la
+   página se construye todo lo que queda.
 4. **Reposo:** los cursores siguen al ratón; con el ratón quieto 2 s forman un anillo con las puntas hacia él.
-5. **Fin:** «Construidas N capas en X s». `Esc` salta al final, `Tour` recorre la página sola (2200 px/s), `4×/8×` cambia la
-   velocidad y `✕` retira los cursores. El botón «Ver otra vez» del pie lo repite.
+5. **Fin:** «Construidas N capas en X s». `Esc` salta al final, `Tour` recorre la página sola (2200 px/s) y `✕` retira los cursores. El botón «Ver otra vez» del pie lo repite.
 
 Se repite **en cada carga**. Con `prefers-reduced-motion` no hace nada, en pantallas de menos de 600 px usa
 8 cursores en lugar de 14, solo anima `transform` y `opacity`, y sin JavaScript la página se ve completa.

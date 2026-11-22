@@ -29,7 +29,7 @@
   var COLORS = ["#2563eb", "#db2777", "#16a34a", "#ea580c", "#7c3aed", "#0891b2", "#ca8a04",
                 "#dc2626", "#0d9488", "#9333ea", "#4f46e5", "#65a30d", "#c026d3", "#0284c7"];
   var NAMES = ["Ana", "Leo", "Mía", "Sam", "Iris", "Teo", "Noa", "Max", "Lía", "Gael", "Eva", "Juan", "Sol", "Pau"];
-  var SCROLL_SPEED = 2200, MAX_CURSOR = 1800, SCAN_MS = 1800;
+  var SPEED = 3, MIN_REVEAL_MS = 180, SCROLL_SPEED = 2200, MAX_CURSOR = 1800, SCAN_MS = 1200;
 
   // Corre en cada carga de la página.
   hideNow();
@@ -67,7 +67,7 @@
       scope: scope, layers: layers.map(function (el, i) { return { el: el, i: i, state: "todo" }; }),
       boxes: Array.prototype.slice.call(scope.querySelectorAll(BOX_SEL)),
       agents: [], ui: null, bar: null, t0: performance.now(), last: performance.now(),
-      phase: "scan", speed: 4, desire: window.scrollY, tour: false, built: 0, finishedAt: 0,
+      phase: "scan", desire: window.scrollY, tour: false, built: 0, finishedAt: 0,
       mouse: { x: window.innerWidth / 2, y: window.innerHeight / 2, moved: 0 }, exiting: false, raf: 0
     };
     buildUi(n);
@@ -114,13 +114,11 @@
       '<span class="sr-dot"></span><span data-k="agents"></span><span data-k="layers"></span>' +
       '<span class="sr-progress"><i></i></span>' +
       '<button type="button" data-k="tour">' + T.tour + '</button>' +
-      '<button type="button" data-k="speed">4×</button>' +
       '<button type="button" data-k="skip" title="' + T.skip + '">⏭</button>' +
       '<button type="button" data-k="close" aria-label="' + T.close + '" title="' + T.close + '">✕</button>';
     document.body.appendChild(bar);
     S.bar = bar;
     bar.querySelector('[data-k="tour"]').onclick = function () { S.tour = !S.tour; this.classList.toggle("on", S.tour); };
-    bar.querySelector('[data-k="speed"]').onclick = function () { S.speed = S.speed === 4 ? 8 : 4; this.textContent = S.speed + "×"; };
     bar.querySelector('[data-k="skip"]').onclick = skipAll;
     bar.querySelector('[data-k="close"]').onclick = exit;
     updateBar();
@@ -143,9 +141,8 @@
   function bindInput() {
     // Fuera de la construcción, el scroll es del usuario: cualquier gesto suyo apaga el Tour.
     function userTakesOver() { if (S.tour) { S.tour = false; var b = S.bar && S.bar.querySelector('[data-k="tour"]'); if (b) b.classList.remove("on"); } }
-    // El scroll es siempre del usuario: si lo usa mientras se construye, la construcción termina al instante
-    // y el gesto pasa tal cual al navegador (nunca se bloquea).
-    function userScrolls() { if (building()) skipAll(); userTakesOver(); }
+    // El scroll es siempre del usuario y nunca se bloquea: los cursores construyen lo que va apareciendo.
+    function userScrolls() { userTakesOver(); }
     S.onWheel = function () { userScrolls(); };
     S.onTouchStart = function () { if (!building()) userTakesOver(); };
     S.onTouchMove = function () { userScrolls(); };
@@ -155,10 +152,10 @@
       if (SCROLL_KEYS[e.key]) userScrolls();
     };
     S.onMouse = function (e) { S.mouse.x = e.clientX; S.mouse.y = e.clientY; S.mouse.moved = performance.now(); };
-    // Un enlace interno durante la construcción termina la construcción y deja saltar.
+    // Un enlace interno salta como siempre; lo que queda atrás se completa y el destino se construye allí.
     S.onClick = function (e) {
       var a = e.target.closest && e.target.closest('a[href^="#"]');
-      if (a && building()) skipAll();
+      if (a) userTakesOver();
     };
     window.addEventListener("wheel", S.onWheel, { passive: true });
     window.addEventListener("touchstart", S.onTouchStart, { passive: true });
@@ -252,12 +249,15 @@
 
   function nextLayer() {
     var vh = window.innerHeight;
+    // Al final de la página ya no se puede bajar más: todo lo que queda cuenta como visible.
+    var atEnd = window.scrollY >= document.documentElement.scrollHeight - vh - 2;
     for (var i = 0; i < S.layers.length; i++) {
       var L = S.layers[i];
       if (L.state !== "todo") continue;
       var r = L.el.getBoundingClientRect();
-      if (r.top < vh - 10 && r.bottom > -vh) return L; // la siguiente capa visible, en orden del DOM
-      return null; // las de más abajo esperan al scroll
+      if (r.bottom <= 0) { finishLayer(L); continue; } // quedó atrás sin construir: aparece ya, para que no falte al volver
+      if (r.top < vh - 10 || atEnd) return L; // la siguiente capa visible, en orden del DOM
+      return null; // las de más abajo esperan a que el scroll las muestre
     }
     return null;
   }
@@ -280,7 +280,7 @@
     if (!S) return;
     var dt = Math.min(0.05, (now - S.last) / 1000);
     S.last = now;
-    var vw = window.innerWidth, vh = window.innerHeight, n = S.agents.length, sp = S.speed;
+    var vw = window.innerWidth, vh = window.innerHeight, n = S.agents.length, sp = SPEED;
 
     if (S.phase === "scan") {
       var p = (now - S.t0) / SCAN_MS;
@@ -298,11 +298,12 @@
         }
         if (a.job) {
           var L2 = a.job, r = L2.el.getBoundingClientRect();
+          if (a.phase === "fly" && r.bottom <= 0) { finishLayer(L2); a.job = null; a.phase = "idle"; updateBar(); return; }
           if (a.phase === "fly") {
             if (moveTo(a, r.left, r.top, dt * sp, 7)) { a.phase = "work"; L2.state = "work"; beginReveal(L2, a); }
           } else {
             if (L2.frame) L2.frame.style.transform = "translate(" + r.left + "px," + r.top + "px)";
-            var q = Math.min(1, (now - L2.start) / (L2.dur / sp));
+            var q = Math.min(1, (now - L2.start) / Math.max(MIN_REVEAL_MS, L2.dur / sp)); // rápido pero siempre visible
             if (L2.mode === "type") {
               var cut = Math.round(L2.text.length * q);
               L2.typed.textContent = L2.text.slice(0, cut);
@@ -318,7 +319,8 @@
           idleMove(a, S.agents.indexOf(a), now, dt);
         }
       });
-      controlledScroll(dt);
+      if (S.tour) controlledScroll(dt);
+      nextLayer(); // completa lo que el scroll dejó atrás aunque todos los cursores estén ocupados
       if (S.built >= S.layers.length) finishRun(now);
     } else if (S.phase === "done") {
       S.agents.forEach(function (a, i) { idleMove(a, i, now, dt); });
